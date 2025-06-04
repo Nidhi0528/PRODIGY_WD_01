@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Navigation Menu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 200vh; /* Extra height to demonstrate scroll effect */
+        }
+
+        /* Navigation Styles */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 1000;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 1rem 2rem;
+        }
+
+        .navbar.scrolled {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 0.5rem 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-item {
+            position: relative;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1.1rem;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .nav-link:hover::before {
+            left: 100%;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            color: #ffffff;
+        }
+
+        .navbar.scrolled .nav-link:hover {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .menu-toggle span {
+            width: 25px;
+            height: 3px;
+            background: white;
+            margin: 3px 0;
+            transition: 0.3s;
+            border-radius: 2px;
+        }
+
+        .menu-toggle.active span:nth-child(1) {
+            transform: rotate(-45deg) translate(-5px, 6px);
+        }
+
+        .menu-toggle.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .menu-toggle.active span:nth-child(3) {
+            transform: rotate(45deg) translate(-5px, -6px);
+        }
+
+        /* Content Sections */
+        .content-section {
+            padding: 120px 2rem 80px;
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .content-section h1 {
+            font-size: 3rem;
+            color: white;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .content-section p {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+
+        .demo-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            transition: transform 0.3s ease;
+        }
+
+        .demo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Contact section specific styles */
+        .contact-info a:hover {
+            color: #667eea !important;
+            text-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: flex;
+            }
+
+            .nav-menu {
+                position: fixed;
+                left: -100%;
+                top: 70px;
+                flex-direction: column;
+                background: rgba(30, 41, 59, 0.95);
+                width: 100%;
+                text-align: center;
+                transition: 0.3s;
+                backdrop-filter: blur(20px);
+                padding: 2rem 0;
+            }
+
+            .nav-menu.active {
+                left: 0;
+            }
+
+            .nav-item {
+                margin: 1rem 0;
+            }
+
+            .content-section {
+                padding: 100px 1rem 60px;
+            }
+
+            .content-section h1 {
+                font-size: 2rem;
+            }
+        }
+
+        /* Scroll Progress Indicator */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            z-index: 1001;
+            transition: width 0.1s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Scroll Progress Bar -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- Navigation Menu -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">💡 Prodigy InfoTech</a>
+            
+            <ul class="nav-menu" id="navMenu">
+                <li class="nav-item">
+                    <a href="#home" class="nav-link">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#about" class="nav-link">About</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#internships" class="nav-link">Internships</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#faqs" class="nav-link">FAQs</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#contact" class="nav-link">Contact</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#verify" class="nav-link">Verify</a>
+                </li>
+            </ul>
+
+            <div class="menu-toggle" id="menuToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content Sections -->
+    <section class="content-section" id="home">
+        <h1>Prodigy InfoTech</h1>
+        <p>Providing World Class E-Learning Experience with Real world Internships</p>
+        
+        <div class="demo-card">
+            <h3 style="color: white; margin-bottom: 1rem;">What We Offer:</h3>
+            <p style="margin-bottom: 0;">🚀 Real-world internship opportunities<br>
+            💻 Hands-on project experience<br>
+            🎓 Industry-relevant skill development<br>
+            🤝 Professional mentorship<br>
+            📜 Certificate verification system</p>
+        </div>
+    </section>
+
+    <section class="content-section" id="about">
+        <h1>About Prodigy InfoTech</h1>
+        <p>Transforming the Way People Learn through innovative e-learning solutions and practical internship programs.</p>
+        
+        <div class="demo-card">
+            <h3 style="color: white; margin-bottom: 1rem;">Our Mission:</h3>
+            <p style="margin-bottom: 0;">We bridge the gap between academic learning and industry requirements by providing comprehensive internship programs that prepare students for real-world challenges in the technology sector.</p>
+        </div>
+    </section>
+
+    <section class="content-section" id="internships">
+        <h1>Internship Programs</h1>
+        <p>Explore our diverse range of internship opportunities across various technology domains.</p>
+        
+        <div class="demo-card">
+            <h3 style="color: white; margin-bottom: 1rem;">Available Programs:</h3>
+            <p style="margin-bottom: 0;">💻 Web Development<br>
+            📱 Mobile App Development<br>
+            🤖 Machine Learning & AI<br>
+            📊 Data Science<br>
+            🎨 UI/UX Design<br>
+            ☁️ Cloud Computing</p>
+        </div>
+    </section>
+
+    <section class="content-section" id="faqs">
+        <h1>Frequently Asked Questions</h1>
+        <p>Find answers to common questions about our programs and services.</p>
+        
+        <div class="demo-card">
+            <h3 style="color: white; margin-bottom: 1rem;">Common Questions:</h3>
+            <p style="margin-bottom: 0;">❓ How do I apply for internships?<br>
+            ⏱️ What is the duration of programs?<br>
+            📋 What are the requirements?<br>
+            🏆 How do I get certified?<br>
+            💰 Are internships paid?</p>
+        </div>
+    </section>
+
+    <section class="content-section" id="verify">
+        <h1>Certificate Verification</h1>
+        <p>Verify the authenticity of certificates issued by Prodigy InfoTech.</p>
+        
+        <div class="demo-card">
+            <h3 style="color: white; margin-bottom: 1rem;">Verification Process:</h3>
+            <p style="margin-bottom: 0;">🔍 Enter certificate ID<br>
+            ✅ Instant verification<br>
+            📄 View certificate details<br>
+            🔒 Secure blockchain-based system</p>
+        </div>
+    </section>
+
+    <section class="content-section" id="contact">
+        <h1>Contact Prodigy InfoTech</h1>
+        <p>Get in touch with us for internship opportunities, queries, or support.</p>
+        
+        <div class="demo-card">
+            <h3 style="color: white; margin-bottom: 1.5rem;">Contact Information</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; text-align: left;">
+                <div>
+                    <h4 style="color: #667eea; margin-bottom: 1rem; font-size: 1.2rem;">📧 Email</h4>
+                    <p style="margin-bottom: 0.5rem;"><a href="mailto:info@prodigyinfotech.dev" style="color: white; text-decoration: none; transition: color 0.3s ease;">info@prodigyinfotech.dev</a></p>
+                    <p style="margin-bottom: 0.5rem;"><a href="mailto:internships@prodigyinfotech.dev" style="color: white; text-decoration: none; transition: color 0.3s ease;">internships@prodigyinfotech.dev</a></p>
+                    <p style="margin-bottom: 0;"><a href="mailto:support@prodigyinfotech.dev" style="color: white; text-decoration: none; transition: color 0.3s ease;">support@prodigyinfotech.dev</a></p>
+                </div>
+                
+                <div>
+                    <h4 style="color: #667eea; margin-bottom: 1rem; font-size: 1.2rem;">📞 Phone</h4>
+                    <p style="margin-bottom: 0.5rem;"><a href="tel:+911234567890" style="color: white; text-decoration: none; transition: color 0.3s ease;">+91 12345 67890</a></p>
+                    <p style="margin-bottom: 0.5rem;"><a href="tel:+911234567891" style="color: white; text-decoration: none; transition: color 0.3s ease;">+91 12345 67891</a></p>
+                    <p style="margin-bottom: 0; font-size: 0.9rem; opacity: 0.8;">WhatsApp Support Available</p>
+                </div>
+                
+                <div>
+                    <h4 style="color: #667eea; margin-bottom: 1rem; font-size: 1.2rem;">📍 Address</h4>
+                    <p style="margin-bottom: 0.5rem;">Prodigy InfoTech Pvt. Ltd.</p>
+                    <p style="margin-bottom: 0.5rem;">Tech Hub, Innovation Center</p>
+                    <p style="margin-bottom: 0.5rem;">Sector 62, Noida</p>
+                    <p style="margin-bottom: 0;">Uttar Pradesh, India - 201309</p>
+                </div>
+                
+                <div>
+                    <h4 style="color: #667eea; margin-bottom: 1rem; font-size: 1.2rem;">🌐 Connect With Us</h4>
+                    <p style="margin-bottom: 0.5rem;"><a href="https://linkedin.com/company/prodigy-infotech" style="color: white; text-decoration: none; transition: color 0.3s ease;">LinkedIn: Prodigy InfoTech</a></p>
+                    <p style="margin-bottom: 0.5rem;"><a href="https://twitter.com/ProdigyInfoTech" style="color: white; text-decoration: none; transition: color 0.3s ease;">Twitter: @ProdigyInfoTech</a></p>
+                    <p style="margin-bottom: 0.5rem;"><a href="https://instagram.com/prodigyinfotech" style="color: white; text-decoration: none; transition: color 0.3s ease;">Instagram: @prodigyinfotech</a></p>
+                    <p style="margin-bottom: 0;"><a href="https://youtube.com/ProdigyInfoTech" style="color: white; text-decoration: none; transition: color 0.3s ease;">YouTube: Prodigy InfoTech</a></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="demo-card" style="margin-top: 2rem;">
+            <h3 style="color: white; margin-bottom: 1.5rem;">Office Hours & Support</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; text-align: left;">
+                <div>
+                    <h4 style="color: #667eea; margin-bottom: 1rem; font-size: 1.1rem;">🕒 Office Hours</h4>
+                    <p style="margin-bottom: 0.5rem;"><strong>Monday - Friday:</strong> 9:00 AM - 7:00 PM</p>
+                    <p style="margin-bottom: 0.5rem;"><strong>Saturday:</strong> 10:00 AM - 5:00 PM</p>
+                    <p style="margin-bottom: 0;"><strong>Sunday:</strong> Closed</p>
+                </div>
+                <div>
+                    <h4 style="color: #667eea; margin-bottom: 1rem; font-size: 1.1rem;">⚡ Quick Support</h4>
+                    <p style="margin-bottom: 0.5rem;"><strong>Time Zone:</strong> IST (UTC+5:30)</p>
+                    <p style="margin-bottom: 0.5rem;"><strong>Email Response:</strong> Within 24 hours</p>
+                    <p style="margin-bottom: 0;"><strong>Internship Queries:</strong> Same day response</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="demo-card" style="margin-top: 2rem;">
+            <h3 style="color: white; margin-bottom: 1.5rem;">🎯 Quick Links</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; text-align: left;">
+                <div>
+                    <p style="margin-bottom: 0.5rem;">📝 <a href="#" style="color: #667eea; text-decoration: none;">Apply for Internship</a></p>
+                    <p style="margin-bottom: 0.5rem;">🔍 <a href="#verify" style="color: #667eea; text-decoration: none;">Verify Certificate</a></p>
+                    <p style="margin-bottom: 0;">❓ <a href="#faqs" style="color: #667eea; text-decoration: none;">View FAQs</a></p>
+                </div>
+                <div>
+                    <p style="margin-bottom: 0.5rem;">💼 <a href="#internships" style="color: #667eea; text-decoration: none;">Browse Programs</a></p>
+                    <p style="margin-bottom: 0.5rem;">📚 <a href="#" style="color: #667eea; text-decoration: none;">Learning Resources</a></p>
+                    <p style="margin-bottom: 0;">🏆 <a href="#" style="color: #667eea; text-decoration: none;">Success Stories</a></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Scroll effect for navbar
+        function handleScroll() {
+            const navbar = document.getElementById('navbar');
+            const scrollProgress = document.getElementById('scrollProgress');
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            // Add scrolled class when page is scrolled
+            if (scrollTop > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+            
+            // Update scroll progress bar
+            const windowHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (scrollTop / windowHeight) * 100;
+            scrollProgress.style.width = scrolled + '%';
+        }
+
+        // Mobile menu toggle
+        function setupMobileMenu() {
+            const menuToggle = document.getElementById('menuToggle');
+            const navMenu = document.getElementById('navMenu');
+            
+            menuToggle.addEventListener('click', () => {
+                menuToggle.classList.toggle('active');
+                navMenu.classList.toggle('active');
+            });
+            
+            // Close mobile menu when clicking on a link
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    menuToggle.classList.remove('active');
+                    navMenu.classList.remove('active');
+                });
+            });
+        }
+
+        // Smooth scrolling for navigation links
+        function setupSmoothScrolling() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = link.getAttribute('href');
+                    
+                    if (targetId.startsWith('#') && targetId !== '#') {
+                        const targetElement = document.querySelector(targetId);
+                        if (targetElement) {
+                            const offsetTop = targetElement.offsetTop - 80;
+                            window.scrollTo({
+                                top: offsetTop,
+                                behavior: 'smooth'
+                            });
+                        }
+                    }
+                });
+            });
+        }
+
+        // Enhanced hover effects
+        function setupHoverEffects() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            navLinks.forEach(link => {
+                link.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-3px) scale(1.05)';
+                });
+                
+                link.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+        }
+
+        // Throttle scroll events for better performance
+        function throttle(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Initialize all functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            setupMobileMenu();
+            setupSmoothScrolling();
+            setupHoverEffects();
+            
+            // Add throttled scroll listener
+            window.addEventListener('scroll', throttle(handleScroll, 10));
+            
+            // Initial call to set correct state
+            handleScroll();
+        });
+
+        // Add some extra interactivity
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add click ripple effect to nav links
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.cssText = `
+                        position: absolute;
+                        width: ${size}px;
+                        height: ${size}px;
+                        left: ${x}px;
+                        top: ${y}px;
+                        background: rgba(255, 255, 255, 0.6);
+                        border-radius: 50%;
+                        transform: scale(0);
+                        animation: ripple 0.6s linear;
+                        pointer-events: none;
+                    `;
+                    
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+            
+            // Add CSS for ripple animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes ripple {
+                    to {
+                        transform: scale(2);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>
